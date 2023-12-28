@@ -1,13 +1,16 @@
 package db
 
-import "gomsg/pkg/models"
+import (
+	"go.uber.org/zap"
+	"gomsg/pkg/models"
+)
 
 func (d *APIDB) GetUserByUsername(name string) (*models.User, error) {
 	rows, err := d.db.Query("SELECT * FROM users WHERE username = $1", name)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var user models.User
 	if !rows.Next() {
@@ -26,7 +29,11 @@ func (d *APIDB) GetUserByID(id int) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			zap.L().Error(err.Error())
+		}
+	}()
 
 	var user models.User
 	if !rows.Next() {

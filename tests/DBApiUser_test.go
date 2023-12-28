@@ -55,7 +55,8 @@ func TestGetUser(t *testing.T) {
 	assert.Equal(t, dbUser2, dbUser)
 
 	// delete user after test
-	dbApi.DeleteUserByUsername(newUser.Username)
+	_, err = dbApi.DeleteUserByUsername(newUser.Username)
+	assert.NoError(t, err)
 }
 
 func TestEditStatus(t *testing.T) {

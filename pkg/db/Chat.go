@@ -12,7 +12,7 @@ func (d *APIDB) GetChatsByUserID(id int) ([]models.Chat, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var chats []models.Chat
 	for rows.Next() {
@@ -37,7 +37,7 @@ func (d *APIDB) GetChatByID(id int) (*models.Chat, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var chat models.Chat
 	var usersIDs []sql.NullInt64

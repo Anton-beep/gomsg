@@ -43,7 +43,8 @@ func TestRegister(t *testing.T) {
 	router, dbAPI := setupApi(t)
 
 	// delete user if exists
-	dbAPI.DeleteUserByUsername("user-1")
+	_, err := dbAPI.DeleteUserByUsername("user-1")
+	assert.NoError(t, err)
 
 	recorder := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/register", strings.NewReader(
@@ -54,7 +55,8 @@ func TestRegister(t *testing.T) {
 	assert.Equal(t, http.StatusOK, recorder.Code)
 
 	// delete user after test
-	dbAPI.DeleteUserByUsername("user-1")
+	_, err = dbAPI.DeleteUserByUsername("user-1")
+	assert.NoError(t, err)
 }
 
 func TestLogin(t *testing.T) {
@@ -65,7 +67,8 @@ func TestLogin(t *testing.T) {
 
 	user := getTimestampUser()
 	user.Token, _ = api.HashPassword(userRawPassword)
-	dbAPI.CreateNewUser(user)
+	_, err := dbAPI.CreateNewUser(user)
+	assert.NoError(t, err)
 
 	recorder := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/api/login", strings.NewReader(
@@ -77,5 +80,6 @@ func TestLogin(t *testing.T) {
 	assert.Equal(t, http.StatusOK, recorder.Code)
 
 	// delete user after test
-	dbAPI.DeleteUserByUsername(user.Username)
+	_, err = dbAPI.DeleteUserByUsername(user.Username)
+	assert.NoError(t, err)
 }

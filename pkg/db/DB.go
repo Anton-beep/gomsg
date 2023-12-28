@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"go.uber.org/zap"
 )
 
 const (
@@ -42,5 +43,13 @@ func handleResultAfterEdit(result sql.Result) (bool, error) {
 		return true, nil
 	} else {
 		return false, nil
+	}
+}
+
+func closeRows(rows *sql.Rows) {
+	if rows != nil {
+		if err := rows.Close(); err != nil {
+			zap.L().Error(err.Error())
+		}
 	}
 }

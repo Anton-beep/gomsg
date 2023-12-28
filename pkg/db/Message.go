@@ -11,7 +11,7 @@ func (d *APIDB) GetMessagesByChatID(id, quantity, timestamp int) ([]models.Messa
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var messages []models.Message
 	for rows.Next() {
@@ -30,7 +30,7 @@ func (d *APIDB) GetMessageByID(id int) (*models.Message, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var message models.Message
 	if !rows.Next() {
@@ -79,7 +79,7 @@ func (d *APIDB) GetMessageUpdates(userID, timestamp int) ([]models.Message, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	var messages []models.Message
 	for rows.Next() {
