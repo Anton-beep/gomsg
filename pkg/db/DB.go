@@ -18,7 +18,12 @@ type APIDB struct {
 }
 
 func NewDb() (*APIDB, error) {
-	connStr := fmt.Sprintf("user=%v password=%v dbname=%v sslmode=disable", user, password, dbname)
+	connStr := fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		user,
+		password,
+		"localhost", // change this to ip of local network for docker container
+		5432,
+		dbname)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, err
