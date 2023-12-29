@@ -28,6 +28,7 @@ func (a *API) Register(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	user, err := a.db.GetUserByUsername(data.Username)
@@ -77,6 +78,7 @@ func (a *API) Login(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	user, err := a.db.GetUserByUsername(data.Username)
@@ -114,6 +116,7 @@ func (a *API) GetUsersChats(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	user, err := a.db.GetUserByID(data.UserID)
@@ -154,6 +157,7 @@ func (a *API) GetMessagesByChatID(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	if data.Quantity == 0 {
@@ -208,6 +212,7 @@ func (a *API) GetInfoAboutUser(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	user, err := a.db.GetUserByID(data.DestUserID)
@@ -240,6 +245,7 @@ func (a *API) EditMessage(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	msg, err := a.db.GetMessageByID(data.MessageID)
@@ -281,6 +287,7 @@ func (a *API) EditStatus(c *gin.Context) {
 	var data editStatusReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	res, err := a.db.EditStatus(data.UserID, data.NewStatus)
@@ -312,6 +319,7 @@ func (a *API) CreateNewMessage(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	message := models.Message{ChatID: data.ChatID, SenderID: data.UserID, Text: data.Text}
@@ -339,6 +347,7 @@ func (a *API) CreateNewChat(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
 		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	chat := models.Chat{UsersIDs: data.UsersIDs, ChatName: data.ChatName}

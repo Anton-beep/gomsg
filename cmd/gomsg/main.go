@@ -19,6 +19,7 @@ func InitLogger() {
 }
 
 func main() {
+	// gin.SetMode(gin.ReleaseMode)
 	InitLogger()
 
 	newDb, err := db.NewDb()
