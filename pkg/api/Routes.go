@@ -26,6 +26,7 @@ type registerReq struct {
 func (a *API) Register(c *gin.Context) {
 	var data registerReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -74,6 +75,7 @@ type loginReq struct {
 func (a *API) Login(c *gin.Context) {
 	var data loginReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -84,11 +86,13 @@ func (a *API) Login(c *gin.Context) {
 		return
 	}
 	if user == nil {
+		zap.L().Debug("user with this username does not exist")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user with this username does not exist"})
 		return
 	}
 
 	if !(CheckPasswordHash(data.Password, user.Token)) {
+		zap.L().Debug("wrong password")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "wrong password"})
 		return
 	}
@@ -108,6 +112,7 @@ type getUsersChatsRequest struct {
 func (a *API) GetUsersChats(c *gin.Context) {
 	var data getUsersChatsRequest
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -118,6 +123,7 @@ func (a *API) GetUsersChats(c *gin.Context) {
 		return
 	}
 	if user == nil {
+		zap.L().Debug("user with this userID does not exist")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user with this userID does not exist"})
 		return
 	}
@@ -146,6 +152,7 @@ type getMessagesByChatID struct {
 func (a *API) GetMessagesByChatID(c *gin.Context) {
 	var data getMessagesByChatID
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -163,10 +170,12 @@ func (a *API) GetMessagesByChatID(c *gin.Context) {
 		return
 	}
 	if chat == nil {
+		zap.L().Debug("chat with this chatID does not exist")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "chat with this chatID does not exist"})
 		return
 	}
 	if !(slices.Contains(chat.UsersIDs, data.UserID)) {
+		zap.L().Debug("user with this userID is not in this chat")
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user with this userID is not in this chat"})
 		return
 	}
@@ -197,6 +206,7 @@ type getInfoByUserReq struct {
 func (a *API) GetInfoAboutUser(c *gin.Context) {
 	var data getInfoByUserReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -207,6 +217,7 @@ func (a *API) GetInfoAboutUser(c *gin.Context) {
 		return
 	}
 	if user == nil {
+		zap.L().Debug("user with this destUserID does not exist")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user with this destUserID does not exist"})
 		return
 	}
@@ -227,16 +238,19 @@ type editMessageReq struct {
 func (a *API) EditMessage(c *gin.Context) {
 	var data editMessageReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
 	msg, err := a.db.GetMessageByID(data.MessageID)
-	if err != nil {
+	if err != nil || msg == nil {
+		zap.L().Error(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "message does not exist"})
 		return
 	}
 
 	if msg.SenderID != data.UserID {
+		zap.L().Debug("you are not sender of this message")
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "you are not sender of this message"})
 		return
 	}
@@ -248,6 +262,7 @@ func (a *API) EditMessage(c *gin.Context) {
 		return
 	}
 	if !res {
+		zap.L().Error("message with this messageID does not exist")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "message with this messageID does not exist"})
 		return
 	}
@@ -295,6 +310,7 @@ type createNewMessageReq struct {
 func (a *API) CreateNewMessage(c *gin.Context) {
 	var data createNewMessageReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -321,6 +337,7 @@ type createNewChatReq struct {
 func (a *API) CreateNewChat(c *gin.Context) {
 	var data createNewChatReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
@@ -348,6 +365,7 @@ type getMessageUpdatesReq struct {
 func (a *API) GetMessageUpdates(c *gin.Context) {
 	var data getMessageUpdatesReq
 	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		zap.L().Debug(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
