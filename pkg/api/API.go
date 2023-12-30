@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gomsg/pkg/db"
 )
@@ -17,21 +18,25 @@ func NewApi(_db *db.APIDB) *API {
 func (a *API) Start() *gin.Engine {
 	router := gin.Default()
 
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
+
 	router.GET("/api/ping", a.Pong)
-	router.GET("/api/register", a.Register)
-	router.GET("/api/login", a.Login)
+	router.POST("/api/register", a.Register)
+	router.POST("/api/login", a.Login)
 
 	authGroup := router.Group("/api/private")
 	authGroup.Use(a.AuthMiddleware())
 
-	authGroup.GET("getChats", a.GetUsersChats)
-	authGroup.GET("getMessagesByChatID", a.GetMessagesByChatID)
-	authGroup.GET("getInfoUser", a.GetInfoAboutUser)
-	authGroup.GET("editMessage", a.EditMessage)
-	authGroup.GET("editStatus", a.EditStatus)
-	authGroup.GET("createMessage", a.CreateNewMessage)
-	authGroup.GET("createChat", a.CreateNewChat)
-	authGroup.GET("getUpdatesMessage", a.GetMessageUpdates)
+	authGroup.POST("getChats", a.GetUsersChats)
+	authGroup.POST("getMessagesByChatID", a.GetMessagesByChatID)
+	authGroup.POST("getInfoUser", a.GetInfoAboutUser)
+	authGroup.POST("editMessage", a.EditMessage)
+	authGroup.POST("editStatus", a.EditStatus)
+	authGroup.POST("createMessage", a.CreateNewMessage)
+	authGroup.POST("createChat", a.CreateNewChat)
+	authGroup.POST("getUpdatesMessage", a.GetMessageUpdates)
 
 	return router
 }
