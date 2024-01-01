@@ -198,9 +198,9 @@ func (a *API) GetMessagesByChatID(c *gin.Context) {
 }
 
 type limitedDataUser struct {
-	Username string
-	Picture  string
-	Status   string
+	Username string `json:"username"`
+	Picture  string `json:"picture"`
+	Status   string `json:"status"`
 }
 
 type getInfoByUserReq struct {
