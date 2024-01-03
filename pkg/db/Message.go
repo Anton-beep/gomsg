@@ -16,7 +16,7 @@ func (d *APIDB) GetMessagesByChatID(id, quantity, timestamp int) ([]models.Messa
 	var messages []models.Message
 	for rows.Next() {
 		var message models.Message
-		err := rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp)
+		err := rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp, &message.SenderName)
 		if err != nil {
 			return nil, err
 		}
@@ -36,7 +36,7 @@ func (d *APIDB) GetMessageByID(id int) (*models.Message, error) {
 	if !rows.Next() {
 		return nil, nil
 	}
-	err = rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp)
+	err = rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp, &message.SenderName)
 	if err != nil {
 		return nil, err
 	}
@@ -47,8 +47,8 @@ func (d *APIDB) GetMessageByID(id int) (*models.Message, error) {
 func (d *APIDB) CreateNewMessage(newMessage models.Message) (int, error) {
 	var newID int
 	timestamp := int(time.Now().Unix())
-	err := d.db.QueryRow("INSERT INTO messages (chatid, text, senderid, timestamp) VALUES ($1, $2, $3, $4) RETURNING messageid",
-		newMessage.ChatID, newMessage.Text, newMessage.SenderID, timestamp).Scan(&newID)
+	err := d.db.QueryRow("INSERT INTO messages (chatid, text, senderid, sendername, timestamp) VALUES ($1, $2, $3, $4, $5) RETURNING messageid",
+		newMessage.ChatID, newMessage.Text, newMessage.SenderID, newMessage.SenderName, timestamp).Scan(&newID)
 	if err != nil {
 		return 0, err
 	}
@@ -84,7 +84,7 @@ func (d *APIDB) GetMessageUpdates(userID, timestamp int) ([]models.Message, erro
 	var messages []models.Message
 	for rows.Next() {
 		var message models.Message
-		err := rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp)
+		err := rows.Scan(&message.MessageID, &message.ChatID, &message.Text, &message.SenderID, &message.Timestamp, &message.SenderName)
 		if err != nil {
 			return nil, err
 		}

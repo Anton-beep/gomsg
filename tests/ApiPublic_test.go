@@ -47,7 +47,7 @@ func TestRegister(t *testing.T) {
 	assert.NoError(t, err)
 
 	recorder := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/api/register", strings.NewReader(
+	req, _ := http.NewRequest(http.MethodPost, "/api/register", strings.NewReader(
 		"{\"username\": \"user-1\", \"password\": \"user-1\"}"),
 	)
 	router.ServeHTTP(recorder, req)
@@ -71,7 +71,7 @@ func TestLogin(t *testing.T) {
 	assert.NoError(t, err)
 
 	recorder := httptest.NewRecorder()
-	req, _ := http.NewRequest(http.MethodGet, "/api/login", strings.NewReader(
+	req, _ := http.NewRequest(http.MethodPost, "/api/login", strings.NewReader(
 		fmt.Sprintf("{\"username\": \"%v\", \"password\": \"%v\"}", user.Username, userRawPassword),
 	))
 	router.ServeHTTP(recorder, req)

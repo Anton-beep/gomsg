@@ -322,7 +322,14 @@ func (a *API) CreateNewMessage(c *gin.Context) {
 		return
 	}
 
-	message := models.Message{ChatID: data.ChatID, SenderID: data.UserID, Text: data.Text}
+	senderUser, err := a.db.GetUserByID(data.UserID)
+	if err != nil {
+		zap.L().Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	message := models.Message{ChatID: data.ChatID, SenderID: data.UserID, SenderName: senderUser.Username, Text: data.Text}
 
 	messageID, err := a.db.CreateNewMessage(message)
 	if err != nil {

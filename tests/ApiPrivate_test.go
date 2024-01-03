@@ -26,7 +26,7 @@ func TestGetChats(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\"}",
 		userID, user.Token))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/getChats", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/getChats", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -68,7 +68,7 @@ func TestGetMessagesByChatIDAPI(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"chatID\": %v}",
 		userID, user.Token, chatID))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/getMessagesByChatID", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/getMessagesByChatID", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -106,7 +106,7 @@ func TestGetInfoUser(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"destUserID\": %v}",
 		userID, user.Token, userDestID))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/getInfoUser", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/getInfoUser", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -143,7 +143,7 @@ func TestEditMessageAPI(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"messageID\": %v, \"newText\": \"newText\"}",
 		userID, user.Token, messageID))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/editMessage", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/editMessage", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -176,7 +176,7 @@ func TestEditStatusApi(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"newStatus\": \"newStatus\"}",
 		userID, user.Token))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/editStatus", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/editStatus", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -204,7 +204,7 @@ func TestCreateNewMessageApi(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"chatID\": %v, \"text\": \"newMessage\"}",
 		userID, user.Token, chatID))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/createMessage", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/createMessage", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -241,7 +241,7 @@ func TestCreateChatAPI(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"chatName\": \"chatName\", \"usersIDs\": [%v]}",
 		userID, user.Token, userID))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/createChat", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/createChat", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
@@ -283,7 +283,7 @@ func TestGetMessageUpdatesAPI(t *testing.T) {
 	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"timestamp\": %v}",
 		userID, user.Token, message.Timestamp))
 	recorder := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/api/private/getUpdatesMessage", reqBody)
+	req, err := http.NewRequest(http.MethodPost, "/api/private/getUpdatesMessage", reqBody)
 	assert.NoError(t, err)
 	router.ServeHTTP(recorder, req)
 
