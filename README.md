@@ -19,9 +19,14 @@ _[you need to install docker before](https://docs.docker.com/engine/install/)_
 ```shell
 git clone https://github.com/Anton-beep/gomsg
 cd gomsg
-docker build -t gomsg .
-docker run -p 8080:8080 --name gomsg --link gomsg_db:gomsg_db gomsg
 ```
+
+change file pkg/db/DB.go on the line 24: change localhost to your local ip (starts with 192.168 and could be found by ```ipconfig``` in windows or ```ifconfig``` in linux, for example 192.168.56.1)
+
+````shell
+docker build -t gomsg .
+docker run -p 8080:8080 -d --name gomsg gomsg
+````
 running in localhost:8080
 
 # Run (local)
