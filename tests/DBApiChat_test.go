@@ -15,6 +15,7 @@ func getTimestampChat() models.Chat {
 	timestamp := strconv.Itoa(int(time.Now().UnixNano()))
 	newChat.ChatName = "chatName" + timestamp
 	newChat.UsersIDs = []int{-1, -2}
+	newChat.UserNames = []string{"username1", "username2"}
 	return newChat
 }
 
@@ -89,7 +90,7 @@ func TestEditUserIDsByChatID(t *testing.T) {
 	newID, err := dbApi.CreateNewChat(newChat)
 	assert.NoError(t, err)
 
-	res, err := dbApi.AddUserToChat(newID, -3)
+	res, err := dbApi.AddUserToChat(newID, -3, "username")
 	assert.NoError(t, err)
 	assert.Equal(t, true, res)
 
@@ -97,7 +98,7 @@ func TestEditUserIDsByChatID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, []int{-1, -2, -3}, dbChat.UsersIDs)
 
-	err = dbApi.RemoveUserFromChat(newID, -3)
+	err = dbApi.RemoveUserFromChat(newID, -3, "username")
 	assert.NoError(t, err)
 	assert.Equal(t, true, res)
 

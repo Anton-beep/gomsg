@@ -357,7 +357,22 @@ func (a *API) CreateNewChat(c *gin.Context) {
 		return
 	}
 
-	chat := models.Chat{UsersIDs: data.UsersIDs, ChatName: data.ChatName}
+	usernames := make([]string, 0, len(data.UsersIDs))
+	for _, userID := range data.UsersIDs {
+		user, err := a.db.GetUserByID(userID)
+		if err != nil {
+			zap.L().Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if user == nil {
+			zap.L().Debug("user with userID" + string(rune(userID)) + "does not exist")
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user with userID" + string(rune(userID)) + "does not exist"})
+			return
+		}
+		usernames = append(usernames, user.Username)
+	}
+	chat := models.Chat{UsersIDs: data.UsersIDs, ChatName: data.ChatName, UserNames: usernames}
 
 	chatID, err := a.db.CreateNewChat(chat)
 	if err != nil {
@@ -396,5 +411,114 @@ func (a *API) GetMessageUpdates(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "OK",
 		"updates": messages,
+	})
+}
+
+type isUserExistReq struct {
+	Username string `json:"username" binding:"required"`
+}
+
+func (a *API) IsUserExists(c *gin.Context) {
+	var data isUserExistReq
+	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.L().Error(err.Error())
+		return
+	}
+
+	user, err := a.db.GetUserByUsername(data.Username)
+	if err != nil {
+		zap.L().Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OK",
+			"exist":   false,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "OK",
+		"exist":   true,
+	})
+}
+
+type createChatUsernamesReq struct {
+	Usernames []string `json:"usernames" binding:"required"`
+	ChatName  string   `json:"chatName" binding:"required"`
+	UserID    int      `json:"userID" binding:"required"`
+}
+
+func (a *API) CreateChatByUsernames(c *gin.Context) {
+	var data createChatUsernamesReq
+	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.L().Error(err.Error())
+		return
+	}
+
+	IDs := make([]int, 0, len(data.Usernames)+1)
+	IDs = append(IDs, data.UserID)
+	for _, username := range data.Usernames {
+		user, err := a.db.GetUserByUsername(username)
+		if err != nil {
+			zap.L().Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if user == nil {
+			zap.L().Debug("user with username" + username + "does not exist")
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "user with username" + username + "does not exist"})
+			return
+		}
+		if slices.Contains(IDs, user.UserID) {
+			continue
+		}
+		IDs = append(IDs, user.UserID)
+	}
+
+	chat := models.Chat{UsersIDs: IDs, ChatName: data.ChatName, UserNames: data.Usernames}
+	chatID, err := a.db.CreateNewChat(chat)
+	if err != nil {
+		zap.L().Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"chatID": chatID,
+	})
+}
+
+type getUsersInChatReq struct {
+	ChatID int `json:"chatID" binding:"required"`
+}
+
+func (a *API) GetInfoChat(c *gin.Context) {
+	var data getUsersInChatReq
+	if err := c.ShouldBindBodyWith(&data, binding.JSON); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		zap.L().Error(err.Error())
+		return
+	}
+
+	chat, err := a.db.GetChatByID(data.ChatID)
+	if err != nil {
+		zap.L().Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if chat == nil {
+		zap.L().Debug("chat with this chatID does not exist")
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "chat with this chatID does not exist"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"usernames": chat.UserNames,
+		"chatName":  chat.ChatName,
 	})
 }

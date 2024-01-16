@@ -6,7 +6,7 @@ import (
 )
 
 func (d *APIDB) GetMessagesByChatID(id, quantity, timestamp int) ([]models.Message, error) {
-	rows, err := d.db.Query("SELECT * FROM messages WHERE chatid = $1 AND timestamp <= $2 ORDER BY timestamp DESC LIMIT $3",
+	rows, err := d.db.Query("SELECT * FROM messages WHERE chatid = $1 AND timestamp <= $2 ORDER BY timestamp LIMIT $3",
 		id, timestamp, quantity)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (d *APIDB) EditMessage(id int, newText string) (bool, error) {
 }
 
 func (d *APIDB) GetMessageUpdates(userID, timestamp int) ([]models.Message, error) {
-	rows, err := d.db.Query("SELECT * FROM messages WHERE senderid = $1 AND timestamp >= $2 ORDER BY timestamp DESC",
+	rows, err := d.db.Query("SELECT * FROM messages WHERE senderid = $1 AND timestamp >= $2 ORDER BY timestamp",
 		userID, timestamp)
 	if err != nil {
 		return nil, err

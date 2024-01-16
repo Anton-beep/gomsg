@@ -37,6 +37,9 @@ func (a *API) Start() *gin.Engine {
 	authGroup.POST("createMessage", a.CreateNewMessage)
 	authGroup.POST("createChat", a.CreateNewChat)
 	authGroup.POST("getUpdatesMessage", a.GetMessageUpdates)
+	authGroup.POST("isUserExists", a.IsUserExists)
+	authGroup.POST("createChatByUsernames", a.CreateChatByUsernames)
+	authGroup.POST("getInfoChat", a.GetInfoChat)
 
 	return router
 }

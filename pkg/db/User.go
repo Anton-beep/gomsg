@@ -6,7 +6,7 @@ import (
 )
 
 func (d *APIDB) GetUserByUsername(name string) (*models.User, error) {
-	rows, err := d.db.Query("SELECT * FROM users WHERE username = $1", name)
+	rows, err := d.db.Query("SELECT * FROM users WHERE username LIKE $1", name)
 	if err != nil {
 		return nil, err
 	}

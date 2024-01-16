@@ -18,7 +18,7 @@ func (d *APIDB) GetChatsByUserID(id int) ([]models.Chat, error) {
 	for rows.Next() {
 		var chat models.Chat
 		var usersIDs []sql.NullInt64
-		err = rows.Scan(&chat.ChatID, &chat.ChatName, pq.Array(&usersIDs), &chat.Timestamp)
+		err = rows.Scan(&chat.ChatID, &chat.ChatName, pq.Array(&usersIDs), &chat.Timestamp, pq.Array(&chat.UserNames))
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +44,7 @@ func (d *APIDB) GetChatByID(id int) (*models.Chat, error) {
 	if !rows.Next() {
 		return nil, nil
 	}
-	err = rows.Scan(&chat.ChatID, &chat.ChatName, pq.Array(&usersIDs), &chat.Timestamp)
+	err = rows.Scan(&chat.ChatID, &chat.ChatName, pq.Array(&usersIDs), &chat.Timestamp, pq.Array(&chat.UserNames))
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (d *APIDB) GetChatByID(id int) (*models.Chat, error) {
 func (d *APIDB) CreateNewChat(chat models.Chat) (int, error) {
 	var newID int
 	timestamp := int(time.Now().Unix())
-	err := d.db.QueryRow("INSERT INTO chats (chatname, usersids, timestamp) VALUES ($1, $2, $3) RETURNING chatid",
-		chat.ChatName, pq.Array(chat.UsersIDs), timestamp).Scan(&newID)
+	err := d.db.QueryRow("INSERT INTO chats (chatname, usersids, timestamp, usernames) VALUES ($1, $2, $3, $4) RETURNING chatid",
+		chat.ChatName, pq.Array(chat.UsersIDs), timestamp, pq.Array(chat.UserNames)).Scan(&newID)
 	return newID, err
 }
 
@@ -81,15 +81,15 @@ func (d *APIDB) EditChatNameByChatID(chatID int, newChatName string) (bool, erro
 	return handleResultAfterEdit(result)
 }
 
-func (d *APIDB) AddUserToChat(chatID int, userID int) (bool, error) {
-	result, err := d.db.Exec("UPDATE chats SET usersids = array_append(usersids, $1) WHERE chatid = $2", userID, chatID)
+func (d *APIDB) AddUserToChat(chatID int, userID int, username string) (bool, error) {
+	result, err := d.db.Exec("UPDATE chats SET usersids = array_append(usersids, $1), usernames = array_append(usernames, $2) WHERE chatid = $3", userID, username, chatID)
 	if err != nil {
 		return false, nil
 	}
 	return handleResultAfterEdit(result)
 }
 
-func (d *APIDB) RemoveUserFromChat(chatID int, userID int) error {
-	_, err := d.db.Exec("UPDATE chats SET usersids = array_remove(usersids, $1) WHERE chatid = $2", userID, chatID)
+func (d *APIDB) RemoveUserFromChat(chatID int, userID int, username string) error {
+	_, err := d.db.Exec("UPDATE chats SET usersids = array_remove(usersids, $1), usernames = array_remove(usernames, $2) WHERE chatid = $3", userID, username, chatID)
 	return err
 }

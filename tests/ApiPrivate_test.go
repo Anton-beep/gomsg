@@ -302,3 +302,112 @@ func TestGetMessageUpdatesAPI(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, res)
 }
+
+func TestIsUserExistsAPI(t *testing.T) {
+	router, dbAPI := setupApi(t)
+
+	user := getTimestampUser()
+	userID, err := dbAPI.CreateNewUser(user)
+	assert.NoError(t, err)
+
+	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"username\": \"%v\"}",
+		userID, user.Token, user.Username))
+	recorder := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/private/isUserExists", reqBody)
+	assert.NoError(t, err)
+	router.ServeHTTP(recorder, req)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.True(t, strings.Contains(recorder.Body.String(), "true"))
+
+	res, err := dbAPI.DeleteUserByID(userID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+}
+
+func TestCreateChatByUsernames(t *testing.T) {
+	router, dbAPI := setupApi(t)
+
+	user := getTimestampUser()
+	userID, err := dbAPI.CreateNewUser(user)
+	assert.NoError(t, err)
+
+	user2 := getTimestampUser()
+	user2ID, err := dbAPI.CreateNewUser(user2)
+	assert.NoError(t, err)
+
+	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"chatName\": \"chatName\", \"usernames\": [\"%v\", \"%v\"]}",
+		userID, user.Token, user.Username, user2.Username))
+	recorder := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/private/createChatByUsernames", reqBody)
+	assert.NoError(t, err)
+	router.ServeHTTP(recorder, req)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	var answer answerCreateChat
+	err = json.Unmarshal(recorder.Body.Bytes(), &answer)
+	assert.NoError(t, err)
+
+	chat, err := dbAPI.GetChatByID(answer.ChatID)
+	assert.True(t, chat != nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "chatName", chat.ChatName)
+
+	res, err := dbAPI.DeleteChat(chat.ChatID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	res, err = dbAPI.DeleteUserByID(userID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	res, err = dbAPI.DeleteUserByID(user2ID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+}
+
+func TestGetUsersInChatAPI(t *testing.T) {
+	router, dbAPI := setupApi(t)
+
+	user := getTimestampUser()
+	userID, err := dbAPI.CreateNewUser(user)
+	assert.NoError(t, err)
+
+	user2 := getTimestampUser()
+	user2ID, err := dbAPI.CreateNewUser(user2)
+	assert.NoError(t, err)
+
+	chat := getTimestampChat()
+	chat.UsersIDs = make([]int, 0)
+	chat.UsersIDs = append(chat.UsersIDs, userID)
+	chat.UsersIDs = append(chat.UsersIDs, user2ID)
+	chat.UserNames = make([]string, 0)
+	chat.UserNames = append(chat.UserNames, user.Username)
+	chat.UserNames = append(chat.UserNames, user2.Username)
+	chatID, err := dbAPI.CreateNewChat(chat)
+	assert.NoError(t, err)
+
+	reqBody := strings.NewReader(fmt.Sprintf("{\"userID\": %v, \"token\": \"%v\", \"chatID\": %v}",
+		userID, user.Token, chatID))
+	recorder := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/private/getInfoChat", reqBody)
+	assert.NoError(t, err)
+	router.ServeHTTP(recorder, req)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	fmt.Println(recorder.Body.String())
+	assert.True(t, strings.Contains(recorder.Body.String(), user.Username))
+	assert.True(t, strings.Contains(recorder.Body.String(), user2.Username))
+
+	res, err := dbAPI.DeleteChat(chatID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	res, err = dbAPI.DeleteUserByID(userID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+
+	res, err = dbAPI.DeleteUserByID(user2ID)
+	assert.NoError(t, err)
+	assert.True(t, res)
+}
